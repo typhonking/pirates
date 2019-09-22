@@ -1,0 +1,26 @@
+Baltic Sea Distances (between St Petersburg and Copenhagen)(see Ports file for port names)
+- P S R C
+P   4 3 9
+S     2 5
+R       7
+C
+
+Atlantic Distances (between Copenhagen and Gibraltar(not a port)(Bristol listed before Bordeaux))
+- C A B  B  P  G
+C   6 12 13 16 20
+A     6  7  10 14
+B        5  7  11
+B           4  8
+P              4
+G
+
+Mediterranean Distances (between Gibraltar and Cyprus)
+- G B R T D  A  I  C
+G   5 7 6 13 11 13 16
+B     3 4 11 9  11 14
+R       2 9  7  9  10
+T         7  5  7  9
+D            6  9  13
+A               2  4
+I                  6
+C                   
