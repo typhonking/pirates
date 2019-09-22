@@ -34,8 +34,20 @@ int main()
   int ship;
   int log [100];
   fGoodsNames = fopen("goods", "r");
+  if (fGoodsNames == NULL){
+    perror("fGoodsNames Error: ");
+    return -1;
+  }
   fGoodsPrices = fopen("prices", "r");
+  if (fGoodsPrices == NULL){
+    perror("fGoodsPrices Error: ");
+    return -1;
+  }
   fPorts = fopen("ports", "r");
+  if (fPorts == NULL){
+    perror("fGoodsPrices Error: ");
+    return -1;
+  }
 
 ///  --- FUNCTIONS ---
   //void loadGame(char input[]){
