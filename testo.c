@@ -4,15 +4,11 @@
 
 int main()
 {
-char x [2];
-int *y;
-int z;
-z=0;
-y=&z;
-//x[1]="9";
-strcpy (x,"a");
-y=x[2];
-
-printf("%d",y);
+char x [20];
+FILE *fTestFile;
+strcpy(x,"hello");
+fTestFile = fopen (x, "w");
+fprintf(fTestFile,"%s\n",x);
+printf("good");
 return 0;
 }
