@@ -6,7 +6,6 @@ FILE *fGoodsNames;
 FILE *fGoodsPrices;
 FILE *fPorts;
 FILE *fDistances;
-FILE *fSave;
 int credit [16];
 int debt [16];
 int price [10][16];//good; port
@@ -37,7 +36,7 @@ void showLogbook (){
   printf("\n\n::  save as  ::  Dock  ::\n\n");
   scanf("%s", input);
   if (strcmp(input, "d") == 0) return;
-  fSave = fopen (input, "w");
+  FILE *fSave = fopen (input, "w");
   fprintf (fSave, "%d %d \n", atSea, newlyArrived);
   fprintf (fSave, "%d %d %d %d %d \n", location[0], location[1], location[2], location[3], location[4]);
   for (int x=0; x<10; x++) fprintf (fSave,"%d ", hold[x]);
@@ -49,6 +48,7 @@ void showLogbook (){
   }
   fprintf(fSave,"\n");
   for (int x=0; x<100; x++) fprintf (fSave, "%d ", logbook[x]);
+  fclose(fSave);
 }
 
   int plotCourse (char course[]){//returns 0 if course is a port, otherwise returns 1
