@@ -6,7 +6,6 @@ FILE *fGoodsNames;
 FILE *fGoodsPrices;
 FILE *fPorts;
 FILE *fDistances;
-FILE *fSave
 int credit [16];
 int debt [16];
 int price [10][16];//good; port
@@ -24,30 +23,32 @@ int atSea=0;
 int exitGame=0;
 int logbook [100];
 int newlyArrived=1;
+int day=1;
 
 void showLogbook (){
   int x =0;
   char input[20];
   printf ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n-------  ship's log  -------\n");
-  while(logbook[day]!=99){ 
+  while(logbook[day]!=99){
     printf ("day %d  -  docked at %s\n\n", x+1, ports[logbook[x]]);
     x++;
   }
   printf("\n\n::  save as  ::  Dock  ::\n\n");
   scanf("%s", input);
   if (strcmp(input, "d") == 0) return;
-  fSave = fopen (input, "w");
+  FILE *fSave = fopen (input, "w");
   fprintf (fSave, "%d %d \n", atSea, newlyArrived);
-  fprintf (fSave, "%d %d %d %d %d \n", location[0], location[1], location[2], location[3], location[4])
-  for (int x=0; x<10; x++) fprintf (fsave,"%d ", hold[x]);
-  fprintf (fsave, "\n%d %d \n", coin, ship);
-  for (int x=0; x<16; x++) fprintf (fsave, "%d %d ", credit[x], debt[x]);
-  fprintf("\n");
-  for (int x=0; x<16, x++) {//prices saved 
+  fprintf (fSave, "%d %d %d %d %d \n", location[0], location[1], location[2], location[3], location[4]);
+  for (int x=0; x<10; x++) fprintf (fSave,"%d ", hold[x]);
+  fprintf (fSave, "\n%d %d \n", coin, ship);
+  for (int x=0; x<16; x++) fprintf (fSave, "%d %d ", credit[x], debt[x]);
+  fprintf(fSave, "\n");
+  for (int x=0; x<16; x++) {//prices saved
 	for (int y=0; y<10; y++) fprintf (fSave,"%d ", price[y][x]);
   }
-  fprintf("\n");
-  for (int x=0; x<100; x++) fprintf (fsave, "%d ", logbook[x]); 
+  fprintf(fSave,"\n");
+  for (int x=0; x<100; x++) fprintf (fSave, "%d ", logbook[x]);
+  fclose(fSave);
 }
 
   int plotCourse (char course[]){//returns 0 if course is a port, otherwise returns 1
