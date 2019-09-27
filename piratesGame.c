@@ -11,8 +11,7 @@ int debt [16];
 int price [10][16];//good; port
 int buff;
 int basePrice[10];
-int location[2];//port from; port to;
-int daysTravelled = 0;
+int location[5];//port from; port to; days travelled; port before gibraltar (or copenhagen if did not stop there); route(0 unless skipping athens or heading to the high seas)
 char goods[10][20];
 char sGoodToTrade[10];
 char course [20];
@@ -39,7 +38,7 @@ void showLogbook (){
   if (strcmp(input, "d") == 0) return;
   FILE *fSave = fopen (input, "w");
   fprintf (fSave, "%d %d \n", atSea, newlyArrived);
-  fprintf (fSave, "%d %d\n", location[0], location[1]);
+  fprintf (fSave, "%d %d %d %d %d \n", location[0], location[1], location[2], location[3], location[4]);
   for (int x=0; x<10; x++) fprintf (fSave,"%d ", hold[x]);
   fprintf (fSave, "\n%d %d \n", coin, ship);
   for (int x=0; x<16; x++) fprintf (fSave, "%d %d ", credit[x], debt[x]);
@@ -51,22 +50,17 @@ void showLogbook (){
   for (int x=0; x<100; x++) fprintf (fSave, "%d ", logbook[x]);
   fclose(fSave);
 }
-void applySeamanship(){
-  location[1]=rand()%16;
-}
-int plotCourse (char course[]){//returns 1 if course is a port, otherwise returns 0
-  int match=0;
-  for(int x=0;x<16;x++){
-    if (strcmp(course, ports[x]) == 0){
-      location[1] = x;
-      match=1;
+
+  int plotCourse (char course[]){//returns 0 if course is a port, otherwise returns 1
+    location[2]=0;
+    for(int x=0;x<16;x++){
+	if (strcmp(course, ports[x]) == 0){
+        location[1] = x;
+        location[2] = 1;
+      }
     }
+    return location[2]==0?1:0;
   }
-  if(match){
-    applySeamanship();
-  }
-  return match;
-}
 
 
   int showGoodsPrices(int y) {
@@ -171,7 +165,7 @@ int setSail(){
   printf("\n\n::  set course  ::  Dock  ::\n\n");
   scanf("%s", goTo);
   if (strcmp(goTo, "d") == 0) return 1;
-  if(plotCourse(goTo))atSea=1;
+  return plotCourse(goTo);//returns 0 if goTo is a port, otherwise returns 1
 }
 
   int setGoodsPrices (){
@@ -204,7 +198,7 @@ int setSail(){
     if (strcmp(input, "q") == 0) exitGame=1;
     if (strcmp(input, "l") == 0) showLogbook();
     if (strcmp(input, "s") == 0) {
-      setSail();
+      if (setSail() == 0)  atSea=1;
     }
   }
 
@@ -218,9 +212,7 @@ int setSail(){
     if (strcmp(goTo,"s") == 0) {
       atSea=0;
     }
-    else {
-      if(plotCourse(goTo))atSea=0;
-    }
+    else if (plotCourse(goTo) == 0) atSea=0;
   }
 
 void gameLoop(){
@@ -229,32 +221,33 @@ void gameLoop(){
     else sea();
   }
 }
-int newGame(){
-  setGoodsPrices ();
-  location [0]=7;//set position to porto
-  location [1]=7;
-  for (int x=0;x<16;x++) {
-	   fscanf(fPorts,"%s",ports[x]);
+  int newGame(){
+      setGoodsPrices ();
+      location [0]=7;//set position to porto
+      location [1]=7;
+      location [2]=0;
+	  for (int x=0;x<16;x++) {
+		fscanf(fPorts,"%s",ports[x]);
+	  }
+	  for (int x=0;x<10;x++) {
+		fscanf(fGoodsNames,"%s",goods[x]);
+	  }
+	  rewind(fPorts);
+	  rewind(fGoodsNames);
+      for (int x=0; x<10; x++) {
+        hold [x] = 0;
+      }
+      for (int x=0;x<16;x++){
+        credit [x] = 0;
+        debt [x] = 0;
+      }
+      for (int x=0;x<100;x++){
+        logbook[x]=99;
+      }
+      ship = 1;
+      coin = 1000;
+      gameLoop();
   }
-  for (int x=0;x<10;x++) {
-	   fscanf(fGoodsNames,"%s",goods[x]);
-  }
-  rewind(fPorts);
-  rewind(fGoodsNames);
-    for (int x=0; x<10; x++) {
-      hold [x] = 0;
-    }
-    for (int x=0;x<16;x++){
-      credit [x] = 0;
-      debt [x] = 0;
-    }
-    for (int x=0;x<100;x++){
-      logbook[x]=99;
-    }
-    ship = 1;
-    coin = 1000;
-    gameLoop();
-}
 
   int startScreen (){
     char input[10];
