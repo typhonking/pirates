@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <PDCurses-3.8/curses.h>
 FILE *fGoodsNames;
 FILE *fGoodsPrices;
 FILE *fPorts;
@@ -28,13 +29,14 @@ int day=1;
 void showLogbook (){
   int x =0;
   char input[20];
-  printf ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n-------  ship's log  -------\n");
+  printw ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n-------  ship's log  -------\n");
   while(logbook[day]!=99){
-    printf ("day %d  -  docked at %s\n\n", x+1, ports[logbook[x]]);
+    printw ("day %d  -  docked at %s\n\n", x+1, ports[logbook[x]]);
     x++;
   }
-  printf("\n\n::  save as  ::  Dock  ::\n\n");
-  scanf("%s", input);
+  printw("\n\n::  save as  ::  Dock  ::\n\n");
+  getnstr(input,16);
+  sprintf(input, "%s.sav", input);
   if (strcmp(input, "d") == 0) return;
   FILE *fSave = fopen (input, "w");
   fprintf (fSave, "%d %d \n", atSea, newlyArrived);
@@ -64,13 +66,11 @@ void showLogbook (){
 
 
   int showGoodsPrices(int y) {
-  printf ("--  the market prices in %s  --  ship's hold\n", ports[location[0]]);
+  printw ("--  the market prices in %s  --  ship's hold\n", ports[location[0]]);
     for (int x=0;x<10;x++){
-      printf("%s : ", goods[x]);
-      printf("%d", price[x][y]);
-      printf("              %d\n", hold[x]);
-      }
-    printf ("                         coin : %d", coin);
+      printw("%s : %d\t%d\n", goods[x],  price[x][y], hold[x]);
+    }
+    printw ("                         coin : %d", coin);
     return 0;
     }
 
@@ -82,55 +82,59 @@ void buyGoods (int amount, int goodToTrade){
   if ( purchasingPower >= balance ) {
     hold[goodToTrade] += amount;
     coin -= amount*price[goodToTrade][location[0]];
-    printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nbought %d for %d. %s to be delivered before dusk\n\n", amount, amount * price [ goodToTrade ] [location[0]], goods[goodToTrade]);
+    printw("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nbought %d for %d. %s to be delivered before dusk\n\n", amount, amount * price [ goodToTrade ] [location[0]], goods[goodToTrade]);
     if (coin < 0){
       debt[location[0]] += (coin * (-1));
       coin =0;
-      printf("extended credit from merchant to value of %d\n\n", debt[location[0]]);
+      printw("extended credit from merchant to value of %d\n\n", debt[location[0]]);
     }
   } else {
-    printf ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nthe merchant will not give so much in advance of payment\n\n");
+    printw ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nthe merchant will not give so much in advance of payment\n\n");
   }
-  getchar();
-  getchar();
+  getch();
 }
 
 int market();
 
 void sellGoods(int amount, int goodToTrade){
-	printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+	printw("\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
     if (hold [goodToTrade] >= amount) {
     hold [goodToTrade] -= amount;
     coin += amount * price[goodToTrade][location[0]] - debt[location[0]];
-	printf("\n\nsold %d for %d. payment to be given on delivery before dusk\n\n", amount, amount*price[goodToTrade][location[0]]);
+	printw("\n\nsold %d for %d. payment to be given on delivery before dusk\n\n", amount, amount*price[goodToTrade][location[0]]);
   }
   else {
-    printf ("\n\ninventory of %s is short\n\n", goods[goodToTrade]);
+    printw ("\n\ninventory of %s is short\n\n", goods[goodToTrade]);
   }
-  getchar();
-  getchar();
+  getch();
 }
 
 
   int market (){
-    int goodToTrade;
-    char buyOrSell[10];//should be b or s or d
+    int goodToTrade=-1;
+    char buyOrSell;//should be b or s or d
     int amount = 0;
-    printf ("\n\n\n\n\n\n\n\n\n\n\n");
+    printw ("\n\n\n\n\n\n\n\n\n\n\n");
     showGoodsPrices (location[0]);//prints list of prices and hold contents
-    printf("\n\n::  Buy amount of wares  ::  Sell amount of wares  ::  Dock ::\n\n");
-    scanf ("%s", buyOrSell);
-    if (strcmp(buyOrSell, "d") == 0) return 0;
-    scanf ("%d", &amount);
-    scanf ("%s", sGoodToTrade);
-
-    for (int x=0; x<10; x++){
-      if ( strcmp(goods[x], sGoodToTrade) == 0){
-        goodToTrade = x;
+    printw("\n\n::  Buy amount of wares  ::  Sell amount of wares  ::  Dock ::\n\n");
+    do{
+    buyOrSell=getch ();
+    }while(buyOrSell!='b'&&buyOrSell!='s'&&buyOrSell!='d');
+    getch();
+    if (buyOrSell == 'd') return 0;
+    while(goodToTrade==-1){
+      addstr("What would you like to trade?\n");
+      getnstr (sGoodToTrade,9);
+      for (int x=0; x<10; x++){
+        if ( strcmp(goods[x], sGoodToTrade) == 0){
+          goodToTrade = x;
+        }
       }
     }
-    if (strcmp(buyOrSell, "b") == 0) buyGoods(amount, goodToTrade);
-    else if (strcmp(buyOrSell, "s")==0) sellGoods(amount, goodToTrade);
+    addstr("How much?\n");
+    scanw ("%d", &amount);
+    if (buyOrSell == 'b') buyGoods(amount, goodToTrade);
+    else if (buyOrSell =='s') sellGoods(amount, goodToTrade);
     market();
     return 0;
   }
@@ -147,7 +151,7 @@ void getDistances(int from1; int from2; int from3; int from; int from5){
     if (number < 10){
 
     }
-    printf ("%d", distance);
+    printw ("%d", distance);
   //}
 }
 */
@@ -156,14 +160,14 @@ int setSail(){
   char goTo [20];
   int tryAgain;
 
-  printf("destination  -------  journey length");
+  printw("destination  -------  journey length\n");
   for (int x=0;x<16;x++){
     //getDistances(location);
-    printf("%s               1\n", ports[x]);
+    printw("%s               1\n", ports[x]);
   }
   rewind (fPorts);
-  printf("\n\n::  set course  ::  Dock  ::\n\n");
-  scanf("%s", goTo);
+  printw("\n\n::  set course  ::  Dock  ::\n\n");
+  getnstr(goTo,sizeof(goTo)-1);
   if (strcmp(goTo, "d") == 0) return 1;
   return plotCourse(goTo);//returns 0 if goTo is a port, otherwise returns 1
 }
@@ -188,12 +192,12 @@ int setSail(){
   void dock(){
     char input[9];
 	location[0]=location[1];
-    printf("\n\n\n\n\n\n\n\n\n\n\n");
-    if (newlyArrived) printf("-------  docked in %s -------", ports[location[0]]);
-    else printf("-------  ship is ready to sail from %s  -------", ports[location[0]]);
+    printw("\n\n\n\n\n\n\n\n\n\n\n");
+    if (newlyArrived) printw("-------  docked in %s -------", ports[location[0]]);
+    else printw("-------  ship is ready to sail from %s  -------", ports[location[0]]);
     newlyArrived=0;
-    printf("\n\n\n\n\n\n::  Market  ::  Sail  ::  Hold  ::  Crew  ::  showLogbook  ::\n\n");
-    scanf("%s", input);
+    printw("\n\n\n\n\n\n::  Market  ::  Sail  ::  Hold  ::  Crew  ::  showLogbook  ::\n\n");
+    getnstr(input,sizeof(input));
     if (strcmp(input, "m") == 0) market();
     if (strcmp(input, "q") == 0) exitGame=1;
     if (strcmp(input, "l") == 0) showLogbook();
@@ -206,9 +210,9 @@ int setSail(){
   int sea(){
     newlyArrived=1;
     char goTo[20];
-    printf("\n\n\n\n\n\n\n\n\n-._,<._,<._,-  sailing for %s  -._,<._,<._,-\n\n\n\n\n\n", ports[location[1]]);
-    printf ("::  Sail on  :: change course  ::");
-    scanf ("%s", goTo);
+    printw("\n\n\n\n\n\n\n\n\n-._,<._,<._,-  sailing for %s  -._,<._,<._,-\n\n\n\n\n\n", ports[location[1]]);
+    printw ("::  Sail on  :: change course  ::");
+    getnstr (goTo,sizeof(goTo));
     if (strcmp(goTo,"s") == 0) {
       atSea=0;
     }
@@ -251,8 +255,8 @@ void gameLoop(){
 
   int startScreen (){
     char input[10];
-    printf(":: N for new game  ::  file name to load  ::");
-    scanf("%s", input);
+    printw(":: N for new game  ::  file name to load  ::");
+    getnstr(input,9);
     if (strcmp (input, "n") == 0){
       newGame();
     } else {
@@ -263,11 +267,18 @@ void gameLoop(){
     }*/
     return 0;
   }
-
+void initCurses(){
+  initscr();
+  cbreak();
+  scrollok(stdscr, TRUE);
+  nodelay(stdscr,FALSE);
+  keypad(stdscr, TRUE);
+  refresh();
+}
 int main()
 {
   srand (time(0));
-
+  initCurses();
   fGoodsNames = fopen("goods", "r");
   if (fGoodsNames == NULL){
     perror("fGoodsNames Error: ");
@@ -300,5 +311,6 @@ startScreen();
 fclose(fPorts);
 fclose(fGoodsNames);
 fclose(fGoodsPrices);
+endwin();
   return 0;
 }
